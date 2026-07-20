@@ -1326,6 +1326,31 @@ export default function Home() {
               <button className={importMode === "new" ? "selected" : ""} onClick={() => setImportMode("new")}>New account</button>
               <button className={importMode === "replace" ? "selected" : ""} disabled={!selectedAccount} onClick={() => setImportMode("replace")}>Replace selected</button>
             </div>
+            <details className="setup-guide">
+              <summary>How to export your Robinhood trade history</summary>
+              <div className="setup-guide-grid">
+                <section>
+                  <strong>Robinhood mobile app</strong>
+                  <ol>
+                    <li>Open <b>Account</b>, then the three-bar menu.</li>
+                    <li>Choose <b>Reports and statements</b> → <b>Account activity reports</b>.</li>
+                    <li>Select <b>Generate new report</b>. Choose the account and your full trading date range.</li>
+                    <li>When Robinhood notifies you, download the CSV and select it below.</li>
+                  </ol>
+                </section>
+                <section>
+                  <strong>Robinhood website</strong>
+                  <ol>
+                    <li>Sign in and open <b>Account</b> → <b>Reports and statements</b>.</li>
+                    <li>Open <b>Account activity reports</b>, then <b>Generate new report</b>.</li>
+                    <li>Choose the account and your full trading date range, then generate the report.</li>
+                    <li>Download the finished CSV and select it below.</li>
+                  </ol>
+                </section>
+              </div>
+              <p>Robinhood says most reports take about two hours, but they can take up to 24 hours. Brokerage and retirement activity are supported; futures, crypto, and spending activity are not included in this report.</p>
+              <a href="https://robinhood.com/us/en/support/articles/finding-your-reports-and-statements/" target="_blank" rel="noreferrer">Open Robinhood’s report instructions ↗</a>
+            </details>
             {importMode === "new" && (
               <label className="account-name-field">
                 <span>ACCOUNT NAME</span>
@@ -1384,6 +1409,19 @@ export default function Home() {
                 />
                 <small>Saved only in this browser. It is sent only to Twelve Data.</small>
               </label>
+            )}
+
+            {draftProvider === "twelve-data" && (
+              <details className="setup-guide api-key-guide">
+                <summary>How to get a Twelve Data API key</summary>
+                <ol>
+                  <li><a href="https://twelvedata.com/register" target="_blank" rel="noreferrer">Create a Twelve Data account ↗</a> and select the free Basic plan.</li>
+                  <li>Confirm your email, sign in, and open your Twelve Data dashboard.</li>
+                  <li>Copy the API key shown in the dashboard, paste it above, and save.</li>
+                </ol>
+                <p>The Basic plan currently includes 8 API credits per minute and 800 per day. TradeReviewerPro batches and caches requests around that limit.</p>
+                <a href="https://twelvedata.com/pricing" target="_blank" rel="noreferrer">Review Twelve Data plans and limits ↗</a>
+              </details>
             )}
 
             <div className="settings-privacy">
