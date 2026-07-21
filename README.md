@@ -45,9 +45,11 @@ getDailyPrices(symbol, startDate, endDate, providerId, options)
 The free-tier planner treats eight symbols as one full credit window. It
 prioritizes a current SPY quote plus the seven largest estimated holdings,
 records those credits locally, and queues historical SPY data until the next
-available window. Current quotes are cached for 15 minutes. Daily SPY prices
-are merged into an IndexedDB history so subsequent visits request only the
-range that is not already available locally. A manual **Fetch next** action
+available window. Current quotes are saved in IndexedDB and reused until the
+user chooses **Refresh prices**, so a portfolio can keep using its last known
+prices for days without making a provider request. Daily SPY prices are merged
+into an IndexedDB history so subsequent visits request only the range that is
+not already available locally. A manual **Fetch next** action
 adds up to eight more holdings, persists that coverage locally, and splits
 future refreshes into rate-safe eight-credit batches. Holdings not yet fetched
 retain their latest imported price and are labeled accordingly.

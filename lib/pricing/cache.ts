@@ -8,8 +8,6 @@ import {
   type PricingRequestOptions,
 } from "./index";
 
-const QUOTE_TTL_MS = 15 * 60 * 1000;
-
 type CachedQuote = { fetchedAt: number; quote: CurrentQuote };
 type CachedSeries = {
   fetchedAt: number;
@@ -18,10 +16,24 @@ type CachedSeries = {
   prices: DailyPrice[];
 };
 
+export async function readCachedCurrentQuotes(
+  symbols: string[],
+  providerId: PricingProviderId,
+) {
+  const uniqueSymbols = [...new Set(
+    symbols.map((symbol) => symbol.trim().toUpperCase()).filter(Boolean),
+  )];
+  const cached = await Promise.all(uniqueSymbols.map(async (symbol) => (
+    readLocalValue<CachedQuote>(MARKET_STORE, `quote:${providerId}:${symbol}`)
+  )));
+  return cached.flatMap((value) => value ? [value.quote] : []);
+}
+
 export async function getCachedCurrentQuotes(
   symbols: string[],
   providerId: PricingProviderId,
   options?: PricingRequestOptions,
+  cacheOptions?: { refresh?: boolean },
 ) {
   const uniqueSymbols = [...new Set(
     symbols.map((symbol) => symbol.trim().toUpperCase()).filter(Boolean),
@@ -31,7 +43,7 @@ export async function getCachedCurrentQuotes(
     return { symbol, key, value: await readLocalValue<CachedQuote>(MARKET_STORE, key) };
   }));
   const staleSymbols = cached
-    .filter(({ value }) => !value || Date.now() - value.fetchedAt >= QUOTE_TTL_MS)
+    .filter(({ value }) => cacheOptions?.refresh || !value)
     .map(({ symbol }) => symbol);
 
   const fetched: CurrentQuote[] = [];
@@ -67,6 +79,22 @@ export async function getCachedCurrentQuotes(
   );
   fetched.forEach((quote) => bySymbol.set(quote.symbol, quote));
   return uniqueSymbols.flatMap((symbol) => bySymbol.get(symbol) || []);
+}
+
+export async function readCachedDailyPrices(
+  symbol: string,
+  startDate: string,
+  endDate: string,
+  providerId: PricingProviderId,
+) {
+  const normalizedSymbol = symbol.trim().toUpperCase();
+  const cached = await readLocalValue<CachedSeries>(
+    MARKET_STORE,
+    `daily:${providerId}:${normalizedSymbol}`,
+  );
+  return (cached?.prices || []).filter(
+    (price) => price.date >= startDate && price.date <= endDate,
+  );
 }
 
 export async function getCachedDailyPrices(
